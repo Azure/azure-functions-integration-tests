@@ -2,5 +2,6 @@
     "Microsoft.Azure.WebJobs.Script",
     "Microsoft.Azure.WebJobs.Script.Grpc",
     "Microsoft.Azure.WebJobs.Script.WebHost",
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7"
+    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "Microsoft.Azure.Functions.PowerShellWorker.PS6"
 ]
