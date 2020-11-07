@@ -1,4 +1,5 @@
 [
     "Microsoft.Azure.WebJobs.Script.WebHost",
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7"
+    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "Microsoft.Azure.Functions.PowerShellWorker.PS6"
 ]
