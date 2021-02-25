@@ -1,3 +1,4 @@
 [
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7"
+    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "Microsoft.Azure.Functions.PythonWorker"
 ]
