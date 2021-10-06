@@ -1,3 +1,6 @@
 [
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7"
+    "Microsoft.Azure.Functions.NodeJsWorker",
+    "Microsoft.Azure.Functions.JavaWorker",
+    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "Microsoft.Azure.Functions.PythonWorker"
 ]

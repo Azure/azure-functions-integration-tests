@@ -1,5 +1,9 @@
 [
+    "Microsoft.Azure.WebJobs.Script",
+    "Microsoft.Azure.WebJobs.Script.Grpc",
     "Microsoft.Azure.WebJobs.Script.WebHost",
+    "Microsoft.Azure.Functions.NodeJsWorker",
+    "Microsoft.Azure.Functions.JavaWorker",
     "Microsoft.Azure.Functions.PowerShellWorker.PS7",
-    "Microsoft.Azure.Functions.PowerShellWorker.PS6"
+    "Microsoft.Azure.Functions.PythonWorker"
 ]
