@@ -1,9 +1,30 @@
 [
-    "Microsoft.Azure.WebJobs.Script",
-    "Microsoft.Azure.WebJobs.Script.Grpc",
-    "Microsoft.Azure.WebJobs.Script.WebHost",
-    "Microsoft.Azure.Functions.NodeJsWorker",
-    "Microsoft.Azure.Functions.JavaWorker",
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
-    "Microsoft.Azure.Functions.PythonWorker"
+  {
+    "Name": "Microsoft.Azure.WebJobs.Script",
+    "MajorVersion": "3"
+  },
+  {
+    "Name": "Microsoft.Azure.WebJobs.Script.Grpc",
+    "MajorVersion": "3"
+  },
+  {
+    "Name": "Microsoft.Azure.WebJobs.Script.WebHost",
+    "MajorVersion": "3"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.NodeJsWorker",
+    "MajorVersion": "2"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.JavaWorker",
+    "MajorVersion": "1"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "MajorVersion": "3"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.PythonWorker",
+    "MajorVersion": null
+  }
 ]

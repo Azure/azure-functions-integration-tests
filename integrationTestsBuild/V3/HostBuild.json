@@ -1,6 +1,18 @@
 [
-    "Microsoft.Azure.Functions.NodeJsWorker",
-    "Microsoft.Azure.Functions.JavaWorker",
-    "Microsoft.Azure.Functions.PowerShellWorker.PS7",
-    "Microsoft.Azure.Functions.PythonWorker"
+  {
+    "Name": "Microsoft.Azure.Functions.NodeJsWorker",
+    "MajorVersion": "2"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.JavaWorker",
+    "MajorVersion": "1"
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.PowerShellWorker.PS7",
+    "MajorVersion": null
+  },
+  {
+    "Name": "Microsoft.Azure.Functions.PythonWorker",
+    "MajorVersion": null
+  }
 ]
