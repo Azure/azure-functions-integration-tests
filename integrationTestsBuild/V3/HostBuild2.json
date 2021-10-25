@@ -5,7 +5,7 @@
   },
   {
     "Name": "Microsoft.Azure.Functions.JavaWorker",
-    "MajorVersion": null
+    "MajorVersion": "1"
   },
   {
     "Name": "Microsoft.Azure.Functions.PowerShellWorker.PS7",
