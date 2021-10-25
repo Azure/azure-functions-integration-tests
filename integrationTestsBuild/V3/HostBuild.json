@@ -9,7 +9,7 @@
   },
   {
     "Name": "Microsoft.Azure.Functions.PowerShellWorker.PS7",
-    "MajorVersion": null
+    "MajorVersion": "3"
   },
   {
     "Name": "Microsoft.Azure.Functions.PythonWorker",
