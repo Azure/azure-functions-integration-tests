@@ -593,7 +593,7 @@ if (-not $validPipelineType.Contains($PipelineType))
 # Create the request body with the pipeline parameters
 $pipelineParams = $null
 
-if ($PipelineParameters)
+if (-not [string]::IsNullOrWhiteSpace($PipelineParameters))
 {
     $pipelineParams = ParsePipelineParameters -PipelineParameters $PipelineParameters
 }
