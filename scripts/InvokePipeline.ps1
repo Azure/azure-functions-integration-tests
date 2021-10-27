@@ -593,13 +593,13 @@ if (-not $validPipelineType.Contains($PipelineType))
 # Create the request body with the pipeline parameters
 $pipelineParams = $null
 
-if (-not [string]::IsNullOrWhiteSpace($PipelineParameters))
+if ([string]::IsNullOrWhiteSpace($PipelineParameters) -or $PipelineParameters -eq "None")
 {
-    $pipelineParams = ParsePipelineParameters -PipelineParameters $PipelineParameters
+    $pipelineParams = @{}
 }
 else
 {
-    $pipelineParams = @{}    
+    $pipelineParams = ParsePipelineParameters -PipelineParameters $PipelineParameters
 }
 
 # For the Core Tools pipeline, add/replace the value for the IntegrationBuildNumber
