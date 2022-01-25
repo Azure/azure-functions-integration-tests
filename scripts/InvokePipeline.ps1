@@ -611,6 +611,9 @@ if ($PipelineDefinitionId -eq 11)
     $pipelineParams[$parameterName] = $integrationBuildNumber
 }
 
+# Remove any empty spaces from the branch name
+$SourceBranch = $SourceBranch.Trim()
+
 $requestBody = @{
     parameters = ( $pipelineParams | ConvertTo-Json )
     definition = @{
