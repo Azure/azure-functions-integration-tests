@@ -13,6 +13,6 @@
   },
   {
     "Name": "Microsoft.Azure.Functions.PythonWorker",
-    "MajorVersion": null
+    "MajorVersion": "3"
   }
 ]
