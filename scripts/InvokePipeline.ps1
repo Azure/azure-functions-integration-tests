@@ -229,11 +229,14 @@ function InvokeDevOpsPipeline
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $FunctionsVersion
+        $FunctionsVersion,
+
+        [Int]
+        $MaximumNumberOfTries = 5
     )
 
     $serviceUrl = GetDevOpsServiceUrl
-    $devOpsUrl =  $serviceUrl + "/_apis/build/builds?api-version=5.0"
+    $devOpsUrl =  $serviceUrl + "/_apis/build/builds?api-version=6.0"
     $requestBody = $pipelineDefinition.RequestBody | ConvertTo-Json
 
     $projectUrl = GetProjectUrl
@@ -246,48 +249,89 @@ function InvokeDevOpsPipeline
     $folderName = $pipelineDefinition.Name.Replace(" ","")
     $badgesFolderPath = Join-Path $PSScriptRoot $folderName
 
-    try
+    $invocationTime = (GetDatePST).ToString("G") + " (PST)"
+    WriteLog -Message "Queueing pipeline '$($pipelineDefinition.Name)'"
+
+    $authHeader = GetAuthenticationHeader
+    $buildStatusUrl = $null
+    $buildId = $null
+    $currentCount = 1
+    $buildStarted = $false
+
+    if ($pipelineDefinition.Type -eq "Test")
     {
-        $invocationTime = (GetDatePST).ToString("G") + " (PST)"
-
-        WriteLog -Message "Queueing pipeline '$($pipelineDefinition.Name)'"
-
-        $authHeader = GetAuthenticationHeader
-        $buildresponse = Invoke-RestMethod -Method Post `
-                                           -ContentType application/json `
-                                           -Uri $devOpsUrl `
-                                           -Body $requestBody `
-                                           -Headers $authHeader `
-                                           -MaximumRetryCount 3 `
-                                           -RetryIntervalSec 1 `
-                                           -ErrorAction Stop
-
-        $buildStatusUrl =  $buildresponse.url
-        WriteLog -Message "Build Status Url: $buildStatusUrl"
-
-        $pipelineViewUrl = $projectUrl + "/_build/results?buildId=$($buildresponse.Id)&view=results"
-        WriteLog -Message "Pipeline has been queued. Please see '$pipelineViewUrl' for execution status."
-
-        $script:pipelineInvocationResult["BuildId"] = $buildresponse.Id
-
-        # Create last-run.svg file
-        $lastRunFileName = "last-run.svg"
-        $filePath = Join-Path $badgesFolderPath $lastRunFileName
-        $label = if ($PipelineDefinition.Type -eq "Build") { "Last build time" } else { "Last test run time" }
-        NewBadge -Label $label -Content $invocationTime -Color "lightgrey" -FilePath $filePath
-        
-        $script:pipelineInvocationResult["ExecutionTime"] = $invocationTime
-    }
-    catch
-    {
-        $message = "Failed to queue pipeline. Exception information: $_"
-        WriteLog -Message $message -Throw
+        # Integration tests pipelines should be run at most 3 times
+        $MaximumNumberOfTries = 3
     }
 
-    $pipelineResult = WaitForPipelineToComplete -BuildUrl $buildStatusUrl
+    do
+    {
+        try
+        {
+            if (-not $buildStarted)
+            {
+                $buildresponse = Invoke-RestMethod  -Method Post `
+                                                    -ContentType application/json `
+                                                    -Uri $devOpsUrl `
+                                                    -Body $requestBody `
+                                                    -Headers $authHeader `
+                                                    -MaximumRetryCount 3 `
+                                                    -RetryIntervalSec 1 `
+                                                    -ErrorAction Stop
+                $buildStarted = $true
+            }
+            else
+            {
+                # Retry failed jobs
+                WriteLog -Message "Rerunning failed jobs for build '$buildId'. Current retry: $currentCount"
+                $retryJobsUrl = $serviceUrl + "/_apis/build/builds/"+ $buildId + "?retry=true&api-version=6.0"
+
+                $buildresponse = Invoke-RestMethod  -Method Patch `
+                                                    -ContentType application/json-patch+json `
+                                                    -Uri $retryJobsUrl `
+                                                    -Headers $authHeader `
+                                                    -MaximumRetryCount 3 `
+                                                    -RetryIntervalSec 1 `
+                                                    -ErrorAction Stop
+            }
+
+            $buildStatusUrl =  $buildresponse.url
+            WriteLog -Message "Build Status Url: $buildStatusUrl"
+
+            $pipelineViewUrl = $projectUrl + "/_build/results?buildId=$($buildresponse.Id)&view=results"
+            WriteLog -Message "Pipeline has been queued. Please see '$pipelineViewUrl' for execution status."
+
+            $script:pipelineInvocationResult["BuildId"] = $buildresponse.Id
+            $buildId = $buildresponse.Id
+        }
+        catch
+        {
+            $message = if (-not $buildStarted) { "Failed to queue pipeline." } else { "Failed to rerun pipeline for build id '$buildId'." }
+            $message += "Exception information: $_"
+            WriteLog -Message $message -Throw
+        }
+
+        $pipelineResult = WaitForPipelineToComplete -BuildUrl $buildStatusUrl
+
+        if ($pipelineResult.result -eq "succeeded")
+        {
+            break
+        }
+
+        # increase the current count
+        $currentCount++
+
+    } while ($currentCount -le $MaximumNumberOfTries)
+
+    # Create last-run.svg file
+    $lastRunFileName = "last-run.svg"
+    $filePath = Join-Path $badgesFolderPath $lastRunFileName
+    $label = if ($PipelineDefinition.Type -eq "Build") { "Last build time" } else { "Last test run time" }
+    NewBadge -Label $label -Content $invocationTime -Color "lightgrey" -FilePath $filePath
+    $script:pipelineInvocationResult["ExecutionTime"] = $invocationTime
 
     $summary = "Pipeline $($pipelineDefinition.Type) "
-    $summary += if ($pipelineResult.status -eq "completed" -and $pipelineResult.result -eq "succeeded") { "completed successfully!" } else { "failed." }
+    $summary += if ($pipelineResult.result -eq "succeeded") { "completed successfully!" } else { "failed." }
     WriteLog -Message $summary
 
     # Create pipeline result badge
