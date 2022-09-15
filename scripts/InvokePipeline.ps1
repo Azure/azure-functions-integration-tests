@@ -157,7 +157,7 @@ function WaitForPipelineToComplete
         [ValidateNotNullOrEmpty()]
         $BuildUrl,        
         $WaitTimeInSeconds = 10,
-        $MaxNumberOfTries = 360
+        $MaxNumberOfTries = 720
     )
 
     $authHeader = GetAuthenticationHeader
