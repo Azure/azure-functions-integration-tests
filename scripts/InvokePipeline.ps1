@@ -331,14 +331,15 @@ function InvokeDevOpsPipeline
     $script:pipelineInvocationResult["ExecutionTime"] = $invocationTime
 
     $summary = "Pipeline $($pipelineDefinition.Type) "
-    $summary += if ($pipelineResult.result -eq "succeeded") { "completed successfully!" } else { "failed." }
+    $summary += "Result: $($pipelineResult.result) "
+    $summary += "Status: $($pipelineResult.status) "
     WriteLog -Message $summary
 
     # Create pipeline result badge
     $pipelineResultFileName = "pipeline-result.svg"
     $filePath = Join-Path $badgesFolderPath $pipelineResultFileName
     $label = "Build id: $($buildresponse.Id)"
-    $content = if ($pipelineResult.result -eq "succeeded") { "succeeded" } else { "failed" }
+    $content = $pipelineResult.result
     $color = if ($pipelineResult.result -eq "succeeded") { "Brightgreen" } else { "red" }
     $script:pipelineInvocationResult["Status"] = $content
     NewBadge -Label $label -Content $content -Color $color -FilePath $filePath
