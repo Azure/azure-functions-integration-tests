@@ -28,10 +28,6 @@
     "MajorVersion": "4"
   },
   {
-    "Name": "Microsoft.Azure.Functions.PowerShellWorker.PS7.4",
-    "MajorVersion": "4"
-  },
-  {
     "Name": "Microsoft.Azure.Functions.PythonWorker",
     "MajorVersion": "4"
   }
