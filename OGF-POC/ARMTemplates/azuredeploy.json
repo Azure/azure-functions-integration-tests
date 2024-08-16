@@ -1,0 +1,140 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2021-02-01",
+        "name": "[variables('hostingPlanName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "tier": "[parameters('skuTier')]",
+          "capacity": "[parameters('skuCapacity')]"
+        },
+        "properties": {
+          "reserved": false,  // False for Windows plan
+          "hyperV": "[parameters('hyperV')]"
+        },
+        "kind": "elastic"
+      },
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2021-04-01",
+        "name": "[variables('storageAccountName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "Standard_LRS"
+        },
+        "kind": "StorageV2"
+      },
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2021-02-01",
+        "name": "[variables('functionAppName')]",
+        "location": "[resourceGroup().location]",
+        "identity": {
+          "type": "SystemAssigned"  // Enabling Managed Identity
+        },
+        "kind": "functionapp",
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "siteConfig": {
+            "appSettings": [
+                {
+                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                    "value": "~4"
+                },
+                {
+                "name": "FUNCTIONS_WORKER_RUNTIME",
+                "value": "[parameters('functionWorkerRuntime')]"
+              },
+              {
+                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTSHARE",
+                "value": "[toLower(variables('functionAppName'))]"
+              },
+              {
+                "name": "WEBSITE_RUN_FROM_PACKAGE",
+                "value": 1
+              },
+              {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2020-02-02').InstrumentationKey]"
+              },
+              {
+                "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                "value": "~2"
+              }
+            ]
+          },
+          "NetFrameworkVersion" : "v6.0",
+          "powerShellVersion" : "7.2"
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+          "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]"
+        ]
+      },
+      {
+        "type": "microsoft.insights/components",
+        "apiVersion": "2020-02-02",
+        "name": "[variables('appInsightsName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "Application_Type": "web"
+        }
+      },
+      {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2020-04-01-preview",
+        "name": "[guid(resourceGroup().id, variables('functionAppName'), 'storageBlobDataContributor')]",
+        "properties": {
+          "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2021-02-01', 'Full').identity.principalId]",
+          "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+          "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ]
+      }
+    ],
+    "parameters": {
+      "functionWorkerRuntime": {
+        "type": "string",
+        "defaultValue": "powershell"
+      },
+      "skuName": {
+        "type": "string",
+        "defaultValue": "EP1"
+      },
+      "skuTier": {
+        "type": "string",
+        "defaultValue": "ElasticPremium"
+      },
+      "skuCapacity": {
+        "type": "int",
+        "defaultValue": 1
+      },
+      "hyperV": {
+        "type": "bool",
+        "defaultValue": false
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "central us"
+      }
+    },
+    "variables": {
+      "hostingPlanName": "[concat(parameters('functionWorkerRuntime'), '-premium-plan')]",
+      "functionAppName": "[concat(parameters('functionWorkerRuntime'), '-func-test1')]",
+      "storageAccountName": "[concat(toLower(uniquestring(resourceGroup().id)), 'storage')]",
+      "appInsightsName": "[concat(variables('functionAppName'), '-ai')]"
+    }
+  }
+  
