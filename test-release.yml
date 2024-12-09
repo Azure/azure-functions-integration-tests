@@ -1,11 +1,23 @@
-jobs:
-- job: ReleaseJob
-  displayName: Publish Release Artifacts
+resources:
+  repositories:
+    - repository: 1es
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
 
-  pool:
-    name: 1es-pool-azfunc
-    image: 1es-windows-2022 
-    os: windows
+extends:
+  template: v1/1ES.Unofficial.PipelineTemplate.yml@1es
+  parameters:
+    pool:
+      name: 1es-pool-azfunc
+      image: 1es-windows-2022
+      os: windows
+    
+    stages:
+      - stage: Release
+        jobs:
+          - job: ReleaseJob
+            displayName: Publish Release Artifacts
 
-  steps:
-  - pwsh: Write-Host "Hello!"
+            steps:
+              - pwsh: Write-Host "Hello!"
