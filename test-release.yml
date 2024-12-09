@@ -1,1 +1,11 @@
+jobs:
+- job: ReleaseJob
+  displayName: Publish Release Artifacts
 
+  pool:
+    name: 1es-pool-azfunc
+    image: 1es-windows-2022 
+    os: windows
+
+  steps:
+  - pwsh: Write-Host "Hello!"
