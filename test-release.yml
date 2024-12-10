@@ -12,49 +12,48 @@ extends:
       name: 1es-pool-azfunc
       image: 1es-windows-2022
       os: windows
-
     stages:
       - stage: Approval
-        displayName: 'Notify and Manual Approval'
-        approval:
-          steps:
-            # Notify Teams via Webhook
-            - task: PowerShell@2
-              displayName: 'Notify Teams'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  $webhookUrl = ${env:WEBHOOK}
-                  $payload = @{
-                    text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
-                  } | ConvertTo-Json -Depth 10
-                  Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
+        displayName: "Notify and Manual Approval"
+        jobs:
+          - job: ApprovalJob
+            steps:
+              # Notify Teams via Webhook
+              - task: PowerShell@2
+                displayName: "Notify Teams"
+                inputs:
+                  targetType: "inline"
+                  script: |
+                    $webhookUrl = $env:WEBHOOK
+                    $payload = @{
+                      text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
+                    } | ConvertTo-Json -Depth 10
+                    Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
 
-            # Manual Approval
-            - task: ManualValidation@0
-              displayName: 'Await Manual Approval'
-              inputs:
-                instructions: 'Please review the release details and approve to continue. Contact release-ops@example.com for assistance.'
-                onTimeout: 'reject'
-                timeout: '2d'
+              # Manual Intervention
+              - task: ManualIntervention@1
+                displayName: "Await Manual Approval"
+                inputs:
+                  instructions: "Please review the release details and approve to continue. Contact release-ops@example.com for assistance."
+                  onTimeout: "reject"
+                  timeout: "2d"
 
       - stage: Release
         jobs:
           - job: ReleaseJob
             displayName: Publish Release Artifacts
-
             steps:
               - pwsh: Write-Host "Hello!"
               - task: GitHubRelease@1
                 inputs:
                   gitHubConnection: Azure
-                  repositoryName: 'Azure/azure-functions-integration-tests'
-                  action: 'create'
-                  target: '744b10576ab340695fb14fc0d99b4b57b8a17989'
-                  tagSource: 'userSpecifiedTag'
-                  tag: 'v4.636.0'
-                  title: '4.636.0'
-                  releaseNotesSource: 'inline'
+                  repositoryName: "Azure/azure-functions-integration-tests"
+                  action: "create"
+                  target: "744b10576ab340695fb14fc0d99b4b57b8a17989"
+                  tagSource: "userSpecifiedTag"
+                  tag: "v4.636.0"
+                  title: "4.636.0"
+                  releaseNotesSource: "inline"
                   releaseNotesInline: |
                     ### Release notes
                     <!-- Please add your release notes in the following format:
@@ -72,9 +71,9 @@ extends:
                     - Update PowerShell 7.4 worker to *An external link was removed to protect your privacy.*
                     - Do not unregister gRPC extension endpoints on host shutdown.
                     - Updated System.Memory.Data reference to 6.0.0 and 8.0.1 for .NET 6 and .NET 8, respectively.
-                  assets: '$(Build.ArtifactStagingDirectory)/*.zip'
+                  assets: "$(Build.ArtifactStagingDirectory)/*.zip"
                   isDraft: false
                   isPreRelease: false
                   addChangeLog: false
-                  changeLogCompareToRelease: 'lastFullRelease'
-                  changeLogType: 'commitBased'
+                  changeLogCompareToRelease: "lastFullRelease"
+                  changeLogType: "commitBased"
