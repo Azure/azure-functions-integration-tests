@@ -17,26 +17,19 @@ extends:
         displayName: "Notify and Manual Approval"
         jobs:
           - job: ApprovalJob
+            displayName: "Approval Job"
+            pool: server # Configures the job to be agentless
             steps:
-              # Notify Teams via Webhook
-              - task: PowerShell@2
-                displayName: "Notify Teams"
-                inputs:
-                  targetType: "inline"
-                  script: |
-                    $webhookUrl = $env:WEBHOOK
-                    $payload = @{
-                      text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
-                    } | ConvertTo-Json -Depth 10
-                    Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
-
               # Manual Intervention
-              - task: ManualIntervention@1
+              - task: ManualValidation@0
                 displayName: "Await Manual Approval"
                 inputs:
-                  instructions: "Please review the release details and approve to continue. Contact release-ops@example.com for assistance."
+                  notifyUsers: |
+                    user1@example.com
+                    user2@example.com
+                  instructions: "Please review the release details and approve to continue. Contact user1@example.com or user2@example.com for assistance."
                   onTimeout: "reject"
-                  timeout: "2d"
+                  timeout: "172800" # 2 days in seconds
 
       - stage: Release
         jobs:
