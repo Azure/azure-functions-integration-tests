@@ -24,9 +24,8 @@ extends:
               - task: ManualValidation@1
                 displayName: "Await Manual Approval"
                 inputs:
-                  notifyUsers: |
-                    ${env:USERLIST}
-                  instructions: "Please review the release details and approve to continue. Contact user1@example.com or user2@example.com for assistance."
+                  notifyUsers: $(userlist)
+                  instructions: "Please review the release details and approve to continue. Contact $(userlist) for assistance."
                   onTimeout: "reject"
                   timeout: "172800" # 2 days in seconds
 
