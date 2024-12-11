@@ -31,9 +31,16 @@ extends:
 
       - stage: Release
         jobs:
-          - job: ReleaseJob
+          - job: Release
             displayName: Publish Release Artifacts
-            steps:
+            templateContext:
+              type: releaseJob  # Required, this indicates this job is a release job
+              isProduction: false  # Required, must be 'true' or 'false'
+              #inputs:  # All input build artifacts must be declared here
+               #- input: pipelineArtifact  # Required, type of the input artifact
+                #artifactName: WebApp  # Required, name of the pipeline artifact
+                #targetPath: $(Pipeline.Workspace)/drop  # Optional, specifies where the artifact is downloaded
+              steps:
               - pwsh: Write-Host "Hello!"
               - task: GitHubRelease@1
                 inputs:
