@@ -40,7 +40,7 @@ extends:
                #- input: pipelineArtifact  # Required, type of the input artifact
                 #artifactName: WebApp  # Required, name of the pipeline artifact
                 #targetPath: $(Pipeline.Workspace)/drop  # Optional, specifies where the artifact is downloaded
-              steps:
+            steps:
               - pwsh: Write-Host "Hello!"
               - task: GitHubRelease@1
                 inputs:
