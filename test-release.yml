@@ -20,14 +20,6 @@ extends:
             displayName: "Approval Job"
             pool: server # Configures the job to be agentless
             steps:
-              # Notify Teams via Webhook
-              - pwsh: |
-                    $webhookUrl = ${env:WEBHOOK}
-                    $payload = @{
-                      text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
-                    } | ConvertTo-Json -Depth 10
-                    Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
-                displayName: "Notify Teams"
               # Manual Intervention
               - task: ManualValidation@1
                 displayName: "Await Manual Approval"
@@ -50,7 +42,13 @@ extends:
                 #artifactName: WebApp  # Required, name of the pipeline artifact
                 #targetPath: $(Pipeline.Workspace)/drop  # Optional, specifies where the artifact is downloaded
             steps:
-              - pwsh: Write-Host "Hello!"
+              # Notify Teams via Webhook
+              - pwsh: |
+                  $webhookUrl = ${env:WEBHOOK}
+                  $payload = @{
+                      text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
+                  } | ConvertTo-Json -Depth 10
+                  Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
               - task: GitHubRelease@1
                 inputs:
                   gitHubConnection: Azure
