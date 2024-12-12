@@ -44,11 +44,12 @@ extends:
             steps:
               # Notify Teams via Webhook
               - pwsh: |
-                  $webhookUrl = ${env:WEBHOOK}
                   $payload = @{
                       text = "A manual approval is required for the pipeline to continue. Please review the release details and approve."
                   } | ConvertTo-Json -Depth 10
-                  Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payload -ContentType "application/json"
+                  Invoke-RestMethod -Uri $env:webhookUrl -Method Post -Body $payload -ContentType "application/json"
+                env:
+                    webhookUrl: $(Webhook)
               - task: GitHubRelease@1
                 inputs:
                   gitHubConnection: Azure
